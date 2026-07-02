@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Cititrust Database Seeder</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px 50px; border-radius: 16px; box-shadow: 0 4px 30px rgba(0,0,0,0.1); max-width: 500px; text-align: center; }
+        h1 { color: #0a2a4a; margin-bottom: 10px; }
+        p { color: #4a5a6e; margin-bottom: 25px; }
+        .btn { background: #c9a84c; border: none; padding: 14px 30px; color: white; font-weight: 700; border-radius: 8px; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
+        .btn:hover { background: #a8892f; transform: scale(1.02); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .log { margin-top: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; text-align: left; max-height: 200px; overflow-y: auto; font-size: 0.9rem; border: 1px solid #e4e7ec; display: none; }
+        .log pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+        .success { color: #16a34a; }
+        .error { color: #dc2626; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🌱 Cititrust Seeder</h1>
+        <p>This will create the client account and populate Firestore with the trust data.</p>
+        <button class="btn" id="seedBtn">Seed Database</button>
+        <div class="log" id="logDiv"><pre id="logContent"></pre></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // ---------------------- YOUR FIREBASE CONFIG ----------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_S6d_q8GSr240HyTUU0nWVdpwrovOy9M",
+            authDomain: "cititrust-7f925.firebaseapp.com",
+            projectId: "cititrust-7f925",
+            storageBucket: "cititrust-7f925.firebasestorage.app",
+            messagingSenderId: "134044558159",
+            appId: "1:134044558159:web:82e9401ea1e53422601b3a",
+            measurementId: "G-Q44C5CYP6J"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ---------------------- CLIENT DATA (as per your spec) ----------------------
+        const clientData = {
+            fullName: "Agyemang Boateng Pattrick",
+            email: "agyemangboatengseth@gmail.com",
+            password: "Nick1844",
+            trustNumber: "AZ535254F",
+            dob: "23/05/1935",
+            secretCode: "GD2J5f273AA",
+            balance: 1800000,
+            interestYTD: 72450,
+            alive: false, // deceased
+            passportImage: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPJibL6IluxC974Hs9_zCJuXKmR1toYgH8uplvm9rDh7m1g_CeqtqE3a-R&s=10",
+            occupation: "Trader/Miner",
+            address: "Asamang Kese, Kumasi, Ashanti Region",
+            spouse: "Miss Agyemang Mary (Deceased)",
+            children: ["Agyemang Boateng Seth"],
+            grandchildren: ["Boateng Cindy"],
+            siblings: [],
+            nationality: "Ghanaian",
+            religion: "Christian",
+            beneficiary: "Agyemang Boateng Seth",
+            sourceOfFunding: "Retirement + proceeds from selling properties",
+            firstDepositYear: "2003",
+            totalTax: 45000,
+            paidTax: 12000,
+            transactions: [
+                { date: "2003-01-15", type: "deposit", amount: 500000, balanceAfter: 500000, status: "Completed" },
+                { date: "2005-06-20", type: "deposit", amount: 300000, balanceAfter: 800000, status: "Completed" },
+                { date: "2010-12-31", type: "interest", amount: 280000, balanceAfter: 1080000, status: "Completed" },
+                { date: "2020-03-15", type: "interest", amount: 420000, balanceAfter: 1500000, status: "Completed" },
+                { date: "2025-12-01", type: "interest", amount: 300000, balanceAfter: 1800000, status: "Completed" }
+            ]
+        };
+
+        // ---------------------- SEED LOGIC ----------------------
+        const seedBtn = document.getElementById('seedBtn');
+        const logDiv = document.getElementById('logDiv');
+        const logContent = document.getElementById('logContent');
+
+        function log(msg, isError = false) {
+            logDiv.style.display = 'block';
+            const line = document.createElement('div');
+            line.textContent = msg;
+            if (isError) line.style.color = '#dc2626';
+            else line.style.color = '#0a2a4a';
+            logContent.appendChild(line);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        seedBtn.addEventListener('click', async () => {
+            seedBtn.disabled = true;
+            seedBtn.textContent = 'Seeding...';
+            logDiv.style.display = 'block';
+            logContent.innerHTML = '';
+
+            try {
+                // 1. Create user (if not exists)
+                log('🔐 Creating/checking user...');
+                let userCred;
+                try {
+                    userCred = await auth.createUserWithEmailAndPassword(clientData.email, clientData.password);
+                    log(`✅ User created with UID: ${userCred.user.uid}`);
+                } catch (err) {
+                    if (err.code === 'auth/email-already-in-use') {
+                        log('ℹ️ User already exists. Signing in to get UID...');
+                        userCred = await auth.signInWithEmailAndPassword(clientData.email, clientData.password);
+                        log(`✅ Signed in. UID: ${userCred.user.uid}`);
+                    } else {
+                        throw err;
+                    }
+                }
+
+                const uid = userCred.user.uid;
+
+                // 2. Write client document to Firestore using the UID as document ID
+                log('📝 Writing client data to Firestore...');
+                const docRef = db.collection('clients').doc(uid);
+                await docRef.set({
+                    ...clientData,
+                    // Remove password from stored data
+                    password: undefined
+                });
+                log('✅ Client document successfully created!');
+
+                // 3. Also create a separate document with trust number as ID for lookup (optional)
+                await db.collection('clients_by_trust').doc(clientData.trustNumber).set({
+                    uid: uid,
+                    fullName: clientData.fullName
+                });
+                log('✅ Cross-reference by trust number created.');
+
+                log('🎉 **SEEDING COMPLETE!** You can now login with the provided email/password.');
+                log('👉 Email: ' + clientData.email);
+                log('👉 Password: ' + clientData.password);
+                log('👉 Trust Number: ' + clientData.trustNumber);
+                log('👉 Secret Code: ' + clientData.secretCode);
+                log('👉 DOB: ' + clientData.dob);
+
+            } catch (err) {
+                log('❌ ERROR: ' + err.message, true);
+                console.error(err);
+            } finally {
+                seedBtn.disabled = false;
+                seedBtn.textContent = 'Seed Database';
+                // Sign out to avoid leaving the user signed in
+                auth.signOut();
+            }
+        });
+    </script>
+</body>
+</html>
