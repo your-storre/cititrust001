@@ -50,13 +50,13 @@
         const clientData = {
             fullName: "Agyemang Boateng Pattrick",
             email: "agyemangboatengseth@gmail.com",
-            password: "Nick1844",
+            password: "Nick1844",     // used only for authentication, NOT stored in Firestore
             trustNumber: "AZ535254F",
             dob: "23/05/1935",
             secretCode: "GD2J5f273AA",
             balance: 1800000,
             interestYTD: 72450,
-            alive: false, // deceased
+            alive: false,
             passportImage: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPJibL6IluxC974Hs9_zCJuXKmR1toYgH8uplvm9rDh7m1g_CeqtqE3a-R&s=10",
             occupation: "Trader/Miner",
             address: "Asamang Kese, Kumasi, Ashanti Region",
@@ -120,17 +120,16 @@
 
                 const uid = userCred.user.uid;
 
-                // 2. Write client document to Firestore using the UID as document ID
+                // 2. Prepare client data WITHOUT the password field
+                const { password, ...clientDataForFirestore } = clientData;
+
+                // 3. Write client document to Firestore using the UID as document ID
                 log('📝 Writing client data to Firestore...');
                 const docRef = db.collection('clients').doc(uid);
-                await docRef.set({
-                    ...clientData,
-                    // Remove password from stored data
-                    password: undefined
-                });
+                await docRef.set(clientDataForFirestore);
                 log('✅ Client document successfully created!');
 
-                // 3. Also create a separate document with trust number as ID for lookup (optional)
+                // 4. Also create a separate document with trust number as ID for lookup (optional)
                 await db.collection('clients_by_trust').doc(clientData.trustNumber).set({
                     uid: uid,
                     fullName: clientData.fullName
