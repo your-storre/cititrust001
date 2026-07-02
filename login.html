@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Access Trust – Cititrust</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a2a4a, #1a3f64);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-wrapper {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 36px;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 8px 48px rgba(0,0,0,0.2);
+    }
+    .login-wrapper .logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .login-wrapper .logo img {
+      height: 52px;
+      width: auto;
+    }
+    .login-wrapper h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0a2a4a;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .login-wrapper .sub {
+      text-align: center;
+      color: #6b7a8f;
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+    .form-step { display: none; }
+    .form-step.active { display: block; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #2d3a4a;
+      margin-bottom: 4px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #cdd2d9;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: 0.2s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #c9a84c;
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.25s;
+      background: #0a2a4a;
+      color: #fff;
+    }
+    .btn:hover { background: #1a3f64; transform: translateY(-1px); }
+    .btn-gold { background: #c9a84c; }
+    .btn-gold:hover { background: #a8892f; }
+    .error-msg {
+      background: #fef2f2;
+      color: #b91c1c;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      display: none;
+      border-left: 3px solid #b91c1c;
+    }
+    .error-msg.show { display: block; }
+    .step-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .step-indicator .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #cdd2d9;
+      transition: 0.3s;
+    }
+    .step-indicator .dot.active { background: #c9a84c; }
+    .extra-link {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 0.9rem;
+      color: #6b7a8f;
+    }
+    .extra-link a {
+      color: #c9a84c;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .extra-link a:hover { text-decoration: underline; }
+    @media (max-width:480px) {
+      .login-wrapper { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="logo">
+      <img src="https://i0.wp.com/cititrustassetmgt.com/wp-content/uploads/2020/08/NEW-DESIGN-CITITRUST-ASSET-MANAGEMENT-logo.jpg?w=580&ssl=1" alt="Cititrust" />
+    </div>
+    <h2>Access Trust</h2>
+    <p class="sub">Secure login to your trust portfolio</p>
+
+    <!-- Step indicator -->
+    <div class="step-indicator">
+      <span class="dot active" id="dot1"></span>
+      <span class="dot" id="dot2"></span>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-msg" id="errorMsg"></div>
+
+    <!-- Step 1: Email + Password -->
+    <form id="step1" class="form-step active">
+      <div class="form-group">
+        <label><i class="fas fa-envelope"></i> Email Address</label>
+        <input type="email" id="loginEmail" placeholder="your@email.com" required />
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-lock"></i> Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn btn-gold" id="step1Btn">Continue <i class="fas fa-arrow-right"></i></button>
+    </form>
+
+    <!-- Step 2: Trust Number, DOB, Secret Code -->
+    <form id="step2" class="form-step">
+      <div class="form-group">
+        <label><i class="fas fa-id-card"></i> Trust Number</label>
+        <input type="text" id="trustNumber" placeholder="e.g. AZ535254F" required />
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-calendar-alt"></i> Trustee Date of Birth</label>
+        <input type="date" id="trustDob" required />
+      </div>
+      <div class="form-group">
+        <label><i class="fas fa-shield-alt"></i> Secret Code</label>
+        <input type="password" id="secretCode" placeholder="Enter secret code" required />
+      </div>
+      <button type="submit" class="btn btn-gold" id="step2Btn">Verify &amp; Access <i class="fas fa-unlock"></i></button>
+      <div style="margin-top:12px;text-align:center;">
+        <button type="button" class="btn btn-outline" style="background:transparent;border:1px solid #cdd2d9;color:#2d3a4a;padding:8px;" id="backStep1">← Back</button>
+      </div>
+    </form>
+
+    <div class="extra-link">
+      <a href="consult.html">Need help? Contact us</a>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_S6d_q8GSr240HyTUU0nWVdpwrovOy9M",
+      authDomain: "cititrust-7f925.firebaseapp.com",
+      projectId: "cititrust-7f925",
+      storageBucket: "cititrust-7f925.firebasestorage.app",
+      messagingSenderId: "134044558159",
+      appId: "1:134044558159:web:82e9401ea1e53422601b3a",
+      measurementId: "G-Q44C5CYP6J"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // DOM elements
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const dot1 = document.getElementById('dot1');
+    const dot2 = document.getElementById('dot2');
+    const errorMsg = document.getElementById('errorMsg');
+
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPassword = document.getElementById('loginPassword');
+    const trustNumber = document.getElementById('trustNumber');
+    const trustDob = document.getElementById('trustDob');
+    const secretCode = document.getElementById('secretCode');
+
+    // Helper to show error
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.add('show');
+    }
+    function hideError() {
+      errorMsg.classList.remove('show');
+    }
+
+    // Step 1: Sign in with Firebase Auth
+    document.getElementById('step1Btn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      hideError();
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value.trim();
+      if (!email || !password) {
+        showError('Please enter email and password.');
+        return;
+      }
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        // Success: move to step 2
+        step1.classList.remove('active');
+        step2.classList.add('active');
+        dot1.classList.remove('active');
+        dot2.classList.add('active');
+        // Pre-fill trust number if we know it (we'll fetch later)
+        // We'll use the email to find the client's trust number
+        const user = auth.currentUser;
+        if (user) {
+          const doc = await db.collection('clients').doc(user.uid).get();
+          if (doc.exists) {
+            const data = doc.data();
+            trustNumber.value = data.trustNumber || '';
+            // Convert DOB to YYYY-MM-DD if exists
+            if (data.dob) {
+              const d = new Date(data.dob);
+              trustDob.value = d.toISOString().split('T')[0];
+            }
+          }
+        }
+      } catch (err) {
+        showError(err.message);
+      }
+    });
+
+    // Back to step 1
+    document.getElementById('backStep1').addEventListener('click', () => {
+      step2.classList.remove('active');
+      step1.classList.add('active');
+      dot2.classList.remove('active');
+      dot1.classList.add('active');
+      hideError();
+    });
+
+    // Step 2: Verify trust number, DOB, secret code
+    document.getElementById('step2Btn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      hideError();
+      const tn = trustNumber.value.trim().toUpperCase();
+      const dob = trustDob.value;
+      const sc = secretCode.value.trim();
+      if (!tn || !dob || !sc) {
+        showError('Please fill in all fields.');
+        return;
+      }
+      try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('Not authenticated. Please restart.');
+        const doc = await db.collection('clients').doc(user.uid).get();
+        if (!doc.exists) throw new Error('Client record not found.');
+        const data = doc.data();
+        // Verify trust number, DOB, secret code
+        if (data.trustNumber !== tn) {
+          showError('Trust number does not match our records.');
+          return;
+        }
+        // Compare DOB (stored as string in DD/MM/YYYY or timestamp)
+        const storedDob = data.dob; // assume stored as string "23/05/1935"
+        const enteredDob = new Date(dob);
+        const enteredFormatted = `${String(enteredDob.getDate()).padStart(2,'0')}/${String(enteredDob.getMonth()+1).padStart(2,'0')}/${enteredDob.getFullYear()}`;
+        if (storedDob !== enteredFormatted) {
+          showError('Date of birth does not match records.');
+          return;
+        }
+        if (data.secretCode !== sc) {
+          showError('Secret code is incorrect.');
+          return;
+        }
+        // All good – redirect to dashboard
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showError(err.message);
+      }
+    });
+
+    // If user is already signed in, skip to step 2? We'll keep it manual.
+  </script>
+</body>
+</html>
