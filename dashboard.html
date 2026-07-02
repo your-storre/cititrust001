@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – Cititrust</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f7fa;
+      color: #1a2430;
+    }
+    .dash-header {
+      background: #fff;
+      border-bottom: 1px solid #e4e7ec;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .dash-header .logo img { height: 40px; width: auto; }
+    .dash-header .user {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .dash-header .user .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #c9a84c;
+    }
+    .dash-header .user .name { font-weight: 600; color: #0a2a4a; }
+    .dash-header .user .role { font-size: 0.8rem; color: #6b7a8f; }
+    .dash-header .logout-btn {
+      background: none;
+      border: 1px solid #cdd2d9;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+      color: #2d3a4a;
+    }
+    .dash-header .logout-btn:hover { background: #f0f2f5; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 24px; }
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: #fff;
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid #e4e7ec;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .tabs .tab {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #6b7a8f;
+      cursor: pointer;
+      transition: 0.2s;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+    }
+    .tabs .tab:hover { background: #f0f2f5; }
+    .tabs .tab.active {
+      background: #0a2a4a;
+      color: #fff;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Cards & stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 22px;
+      border: 1px solid #e4e7ec;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .stat-card .label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #6b7a8f;
+      font-weight: 500;
+    }
+    .stat-card .value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #0a2a4a;
+      margin-top: 4px;
+    }
+    .stat-card .change {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #16a34a;
+      margin-top: 4px;
+    }
+    .stat-card .change.negative { color: #dc2626; }
+
+    .table-wrap {
+      overflow-x: auto;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #e4e7ec;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .table-wrap th {
+      background: #f8fafc;
+      text-align: left;
+      padding: 12px 20px;
+      font-weight: 600;
+      color: #2d3a4a;
+      border-bottom: 2px solid #e4e7ec;
+    }
+    .table-wrap td {
+      padding: 12px 20px;
+      border-bottom: 1px solid #eef1f5;
+      color: #1a2430;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge.deposit { background: #dcfce7; color: #166534; }
+    .badge.withdrawal { background: #fef2f2; color: #991b1b; }
+    .badge.interest { background: #e0f2fe; color: #075985; }
+    .badge.claim { background: #fef3c7; color: #92400e; }
+
+    /* Profile */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 28px;
+    }
+    .profile-sidebar {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #e4e7ec;
+      text-align: center;
+    }
+    .profile-sidebar .avatar-lg {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #c9a84c;
+      margin: 0 auto 12px;
+    }
+    .profile-sidebar h3 { font-size: 1.2rem; color: #0a2a4a; }
+    .profile-sidebar .status {
+      display: inline-block;
+      padding: 2px 16px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .status.deceased { background: #fef2f2; color: #991b1b; }
+    .status.alive { background: #dcfce7; color: #166534; }
+    .profile-sidebar .meta-item {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #e4e7ec;
+      font-size: 0.9rem;
+      color: #6b7a8f;
+    }
+    .profile-sidebar .meta-item strong { display: block; color: #1a2430; font-weight: 600; }
+    .profile-main {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px 32px;
+      border: 1px solid #e4e7ec;
+    }
+    .profile-main .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 32px;
+    }
+    .profile-main .info-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f2f5;
+    }
+    .profile-main .info-item .label {
+      font-size: 0.8rem;
+      color: #6b7a8f;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .profile-main .info-item .value { font-weight: 600; margin-top: 2px; }
+
+    /* Deed */
+    .deed-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px 48px;
+      border: 1px solid #e4e7ec;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+    }
+    .deed-container .deed-header {
+      text-align: center;
+      border-bottom: 2px solid #0a2a4a;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+    }
+    .deed-container .deed-header img { height: 48px; margin-bottom: 8px; }
+    .deed-container .deed-header h2 { font-size: 1.6rem; color: #0a2a4a; }
+    .deed-container .deed-body { font-size: 0.95rem; line-height: 1.8; color: #2d3a4a; }
+    .deed-container .deed-body h4 { color: #0a2a4a; margin: 20px 0 8px; }
+    .deed-container .deed-body .clause {
+      padding-left: 20px;
+      border-left: 3px solid #c9a84c;
+      margin: 12px 0;
+      padding: 8px 16px;
+      background: #f8fafc;
+      border-radius: 4px;
+    }
+    .deed-container .deed-footer {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 2px solid #e4e7ec;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .deed-container .deed-footer .signature-area { text-align: center; }
+    .deed-container .deed-footer .signature-area img { height: 50px; opacity: 0.85; }
+    .deed-container .deed-footer .seal-area { display: flex; gap: 20px; align-items: center; }
+    .deed-container .deed-footer .seal-area img { height: 56px; }
+    .deed-actions { display: flex; gap: 12px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+    .btn-sm { padding: 8px 20px; font-size: 0.85rem; }
+
+    /* Tax */
+    .tax-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+      gap: 20px;
+      margin-top: 16px;
+    }
+    .tax-card {
+      background: #fff;
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid #e4e7ec;
+      text-align: center;
+    }
+    .tax-card .amount { font-size: 1.8rem; font-weight: 700; color: #0a2a4a; }
+    .tax-card .label { font-size: 0.85rem; color: #6b7a8f; font-weight: 500; }
+
+    /* Claim */
+    .claim-requirements {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 16px 20px;
+      border-left: 4px solid #c9a84c;
+      margin: 16px 0;
+    }
+    .claim-requirements h4 { color: #0a2a4a; margin-bottom: 6px; }
+    .claim-requirements ul { list-style: none; padding: 0; }
+    .claim-requirements ul li { padding: 4px 0; display: flex; align-items: center; gap: 10px; }
+    .claim-requirements ul li i { color: #c9a84c; min-width: 20px; }
+
+    /* Responsive */
+    @media (max-width:768px) {
+      .profile-grid { grid-template-columns: 1fr; }
+      .profile-main .info-grid { grid-template-columns: 1fr; }
+      .deed-container { padding: 24px 20px; }
+      .dash-header { flex-direction: column; align-items: stretch; }
+      .tabs .tab { padding: 8px 16px; font-size: 0.8rem; flex:1; text-align:center; }
+    }
+    @media (max-width:480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .tax-grid { grid-template-columns: 1fr; }
+    }
+    .loading { text-align: center; padding: 40px; color: #6b7a8f; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="dash-header">
+    <div class="logo">
+      <img src="https://i0.wp.com/cititrustassetmgt.com/wp-content/uploads/2020/08/NEW-DESIGN-CITITRUST-ASSET-MANAGEMENT-logo.jpg?w=580&ssl=1" alt="Cititrust" />
+    </div>
+    <div class="user">
+      <img class="avatar" id="userAvatar" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPJibL6IluxC974Hs9_zCJuXKmR1toYgH8uplvm9rDh7m1g_CeqtqE3a-R&s=10" alt="Avatar" />
+      <div>
+        <div class="name" id="userName">Agyemang Boateng Pattrick</div>
+        <div class="role" id="userRole">Trustee</div>
+      </div>
+      <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Tabs -->
+    <div class="tabs" id="tabsContainer">
+      <button class="tab active" data-tab="overview"><i class="fas fa-chart-pie"></i> Overview</button>
+      <button class="tab" data-tab="profile"><i class="fas fa-user-circle"></i> Profile</button>
+      <button class="tab" data-tab="deed"><i class="fas fa-file-contract"></i> Trust Deed</button>
+      <button class="tab" data-tab="tax"><i class="fas fa-calculator"></i> Tax</button>
+      <button class="tab" data-tab="claim"><i class="fas fa-file-invoice"></i> Claim</button>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading"><i class="fas fa-spinner fa-spin"></i> Loading your trust data...</div>
+
+    <!-- ====== OVERVIEW TAB ====== -->
+    <div id="overview" class="tab-content active">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="label">Total Balance</div>
+          <div class="value" id="totalBalance">$1,800,000.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Interest Earned (YTD)</div>
+          <div class="value" id="interestYTD">$72,450.00</div>
+          <div class="change"><i class="fas fa-arrow-up"></i> +4.2%</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Last Deposit</div>
+          <div class="value" id="lastDeposit">$50,000.00</div>
+          <div class="change">Dec 2025</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Total Claims</div>
+          <div class="value" id="totalClaims">$0.00</div>
+          <div class="change">No claims</div>
+        </div>
+      </div>
+
+      <h3 style="margin: 16px 0 8px; color:#0a2a4a;">Transaction History</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance After</th><th>Status</th></tr>
+          </thead>
+          <tbody id="transactionTable">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ====== PROFILE TAB ====== -->
+    <div id="profile" class="tab-content">
+      <div class="profile-grid" id="profileGrid">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- ====== TRUST DEED TAB ====== -->
+    <div id="deed" class="tab-content">
+      <div class="deed-container" id="deedContainer">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- ====== TAX TAB ====== -->
+    <div id="tax" class="tab-content">
+      <h3 style="color:#0a2a4a; margin-bottom:12px;">Tax Accumulation</h3>
+      <div class="tax-grid" id="taxGrid">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- ====== CLAIM TAB ====== -->
+    <div id="claim" class="tab-content">
+      <h3 style="color:#0a2a4a; margin-bottom:8px;">Claim Your Trust</h3>
+      <p style="color:#6b7a8f; margin-bottom:20px;">Please fill the form below to initiate a claim. Based on your situation, we'll show the required documents.</p>
+      <form id="claimForm">
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>Your Relationship to the Trustee</label>
+          <select id="claimRelationship" required>
+            <option value="">Select...</option>
+            <option value="Direct Beneficiary">Direct Beneficiary</option>
+            <option value="Son">Son</option>
+            <option value="Daughter">Daughter</option>
+            <option value="Grandchild">Grandchild</option>
+            <option value="Spouse">Spouse</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>Reason for Claim</label>
+          <select id="claimReason" required>
+            <option value="">Select reason...</option>
+            <option value="Trustee Deceased">Trustee Deceased</option>
+            <option value="Trustee Mentally Incapacitated">Trustee Mentally Incapacitated</option>
+            <option value="Trustee Severely Ill">Trustee Severely Ill</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>Additional Information</label>
+          <textarea id="claimDetails" rows="3" placeholder="Provide any additional context..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-sm" style="background:#c9a84c;color:#fff;border:none;padding:10px 28px;border-radius:6px;cursor:pointer;font-weight:600;">Submit Claim Request</button>
+      </form>
+
+      <div id="claimRequirements" class="claim-requirements hidden">
+        <h4><i class="fas fa-list-ul"></i> Required Documents</h4>
+        <ul id="reqList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_S6d_q8GSr240HyTUU0nWVdpwrovOy9M",
+      authDomain: "cititrust-7f925.firebaseapp.com",
+      projectId: "cititrust-7f925",
+      storageBucket: "cititrust-7f925.firebasestorage.app",
+      messagingSenderId: "134044558159",
+      appId: "1:134044558159:web:82e9401ea1e53422601b3a",
+      measurementId: "G-Q44C5CYP6J"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // DOM refs
+    const loadingEl = document.getElementById('loading');
+    const tabs = document.querySelectorAll('.tab');
+    const contents = {
+      overview: document.getElementById('overview'),
+      profile: document.getElementById('profile'),
+      deed: document.getElementById('deed'),
+      tax: document.getElementById('tax'),
+      claim: document.getElementById('claim')
+    };
+
+    // Tab switching
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        Object.keys(contents).forEach(key => {
+          contents[key].classList.toggle('active', key === tab.dataset.tab);
+        });
+      });
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      auth.signOut().then(() => window.location.href = 'login.html');
+    });
+
+    // Load data when authenticated
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+      try {
+        const doc = await db.collection('clients').doc(user.uid).get();
+        if (!doc.exists) {
+          alert('Client data not found. Please contact support.');
+          return;
+        }
+        const data = doc.data();
+        // Populate all sections
+        populateOverview(data);
+        populateProfile(data);
+        populateDeed(data);
+        populateTax(data);
+        populateClaim(data);
+        // Update header
+        document.getElementById('userName').textContent = data.fullName || 'Client';
+        document.getElementById('userAvatar').src = data.passportImage || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPJibL6IluxC974Hs9_zCJuXKmR1toYgH8uplvm9rDh7m1g_CeqtqE3a-R&s=10';
+        loadingEl.classList.add('hidden');
+      } catch (err) {
+        alert('Error loading data: ' + err.message);
+        loadingEl.textContent = 'Error loading data. Please refresh.';
+      }
+    });
+
+    // ---------- Populate functions ----------
+    function populateOverview(data) {
+      document.getElementById('totalBalance').textContent = `$${data.balance?.toLocaleString('en-US', {minimumFractionDigits:2}) || '0.00'}`;
+      // Interest YTD – compute from transactions or just display from data
+      const interestYTD = data.interestYTD || 72450;
+      document.getElementById('interestYTD').textContent = `$${interestYTD.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+      // Last deposit
+      const lastDep = data.transactions?.filter(t => t.type === 'deposit').pop();
+      if (lastDep) {
+        document.getElementById('lastDeposit').textContent = `$${lastDep.amount.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+      } else {
+        document.getElementById('lastDeposit').textContent = '$0.00';
+      }
+      document.getElementById('totalClaims').textContent = `$${data.totalClaims || 0}`;
+
+      // Transactions table
+      const tbody = document.getElementById('transactionTable');
+      tbody.innerHTML = '';
+      const txns = data.transactions || [];
+      // Sort by date descending
+      txns.sort((a,b) => new Date(b.date) - new Date(a.date));
+      txns.forEach(t => {
+        const row = document.createElement('tr');
+        const date = new Date(t.date).toLocaleDateString('en-GB');
+        const typeClass = t.type;
+        row.innerHTML = `
+          <td>${date}</td>
+          <td><span class="badge ${typeClass}">${t.type.charAt(0).toUpperCase()+t.type.slice(1)}</span></td>
+          <td>$${t.amount.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+          <td>$${t.balanceAfter?.toLocaleString('en-US', {minimumFractionDigits:2}) || '—'}</td>
+          <td>${t.status || 'Completed'}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function populateProfile(data) {
+      const grid = document.getElementById('profileGrid');
+      const statusClass = data.alive ? 'alive' : 'deceased';
+      const statusText = data.alive ? 'Alive' : 'Deceased';
+      const spouse = data.spouse || 'N/A';
+      const children = (data.children || []).join(', ') || 'None';
+      const siblings = (data.siblings || []).join(', ') || 'None';
+      const grandchildren = (data.grandchildren || []).join(', ') || 'None';
+      grid.innerHTML = `
+        <div class="profile-sidebar">
+          <img class="avatar-lg" src="${data.passportImage || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPJibL6IluxC974Hs9_zCJuXKmR1toYgH8uplvm9rDh7m1g_CeqtqE3a-R&s=10'}" alt="Trustee" />
+          <h3>${data.fullName || 'Trustee'}</h3>
+          <span class="status ${statusClass}">${statusText}</span>
+          <div class="meta-item"><strong>Trust Number</strong> ${data.trustNumber || 'N/A'}</div>
+          <div class="meta-item"><strong>Occupation</strong> ${data.occupation || 'N/A'}</div>
+          <div class="meta-item"><strong>Nationality</strong> ${data.nationality || 'Ghanaian'}</div>
+        </div>
+        <div class="profile-main">
+          <h3 style="margin-bottom:12px;">Trustee Details</h3>
+          <div class="info-grid">
+            <div class="info-item"><div class="label">Full Name</div><div class="value">${data.fullName}</div></div>
+            <div class="info-item"><div class="label">Date of Birth</div><div class="value">${data.dob || 'N/A'}</div></div>
+            <div class="info-item"><div class="label">Address</div><div class="value">${data.address || 'N/A'}</div></div>
+            <div class="info-item"><div class="label">Status</div><div class="value">${statusText}</div></div>
+            <div class="info-item"><div class="label">Spouse</div><div class="value">${spouse}</div></div>
+            <div class="info-item"><div class="label">Children</div><div class="value">${children}</div></div>
+            <div class="info-item"><div class="label">Siblings</div><div class="value">${siblings}</div></div>
+            <div class="info-item"><div class="label">Grandchildren</div><div class="value">${grandchildren}</div></div>
+            <div class="info-item"><div class="label">First Deposit Year</div><div class="value">${data.firstDepositYear || 'N/A'}</div></div>
+            <div class="info-item"><div class="label">Source of Funding</div><div class="value">${data.sourceOfFunding || 'N/A'}</div></div>
+            <div class="info-item"><div class="label">Religion</div><div class="value">${data.religion || 'N/A'}</div></div>
+            <div class="info-item"><div class="label">Beneficiary</div><div class="value">${data.beneficiary || 'N/A'}</div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function populateDeed(data) {
+      const container = document.getElementById('deedContainer');
+      container.innerHTML = `
+        <div class="deed-header">
+          <img src="https://i0.wp.com/cititrustassetmgt.com/wp-content/uploads/2020/08/NEW-DESIGN-CITITRUST-ASSET-MANAGEMENT-logo.jpg?w=580&ssl=1" alt="Cititrust" />
+          <h2>TRUST DEED</h2>
+          <div class="deed-number">Trust No: ${data.trustNumber || 'N/A'}</div>
+        </div>
+        <div class="deed-body">
+          <p>This Trust Deed is made on this day <strong>${new Date().toLocaleDateString('en-GB')}</strong> between <strong>${data.fullName || 'the Trustee'}</strong> (the "Settlor") and <strong>Cititrust Asset Management Limited</strong> (the "Trustee").</p>
+          <h4>1. Establishment of Trust</h4>
+          <p>The Settlor hereby transfers and assigns all assets listed in Schedule A to the Trustee to hold upon the trusts declared herein.</p>
+          <h4>2. Beneficiaries</h4>
+          <p>The primary beneficiary is <strong>${data.beneficiary || 'the Beneficiary'}</strong>. Secondary beneficiaries include the Settlor's children and grandchildren as listed in Schedule B.</p>
+          <div class="clause">
+            <strong>Clause 2.1:</strong> Distribution of income and capital shall be made at the discretion of the Trustee, subject to the conditions set out in this Deed.
+          </div>
+          <h4>3. Conditions Precedent to Claim</h4>
+          <ul style="padding-left:20px;margin:8px 0;">
+            <li>The beneficiary must provide satisfactory evidence of identity and relationship.</li>
+            <li>If the Settlor is deceased, a valid death certificate and will (if any) must be submitted.</li>
+            <li>If the Settlor is incapacitated, a medical certificate and court order (where required) must be provided.</li>
+          </ul>
+          <h4>4. Governing Law</h4>
+          <p>This Trust shall be governed by the laws of the Republic of Ghana and is subject to the regulatory oversight of the Securities and Exchange Commission and the Bank of Ghana.</p>
+        </div>
+        <div class="deed-footer">
+          <div class="signature-area">
+            <img src="https://static.vecteezy.com/system/resources/previews/025/866/358/non_2x/fake-autograph-samples-hand-drawn-signatures-examples-of-documents-certificates-and-contracts-with-inked-and-handwritten-lettering-vector.jpg" alt="Signature" />
+            <div class="sig-label">Settlor's Signature</div>
+          </div>
+          <div class="seal-area">
+            <img src="https://afi-global.org/wp-content/uploads/2024/11/bank-of-ghana-logo.png" alt="Bank of Ghana" />
+            <img src="https://www.primenewsghana.com/images/2020/sept/07/Ghana-Securities-and-Exchange-Commission-Job-Recruitment.jpg" alt="SEC" />
+            <span style="font-weight:600;color:#0a2a4a;">SEAL</span>
+          </div>
+        </div>
+        <div class="deed-actions">
+          <button onclick="window.print()" class="btn-sm" style="background:#0a2a4a;color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;"><i class="fas fa-print"></i> Print Deed</button>
+          <button onclick="alert('Download functionality would be implemented here.')" class="btn-sm" style="background:#c9a84c;color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;"><i class="fas fa-download"></i> Download PDF</button>
+        </div>
+      `;
+    }
+
+    function populateTax(data) {
+      const grid = document.getElementById('taxGrid');
+      const totalTax = data.totalTax || 0;
+      const paidTax = data.paidTax || 0;
+      const outstanding = totalTax - paidTax;
+      grid.innerHTML = `
+        <div class="tax-card"><div class="amount">$${totalTax.toLocaleString('en-US', {minimumFractionDigits:2})}</div><div class="label">Total Accumulated Tax</div></div>
+        <div class="tax-card"><div class="amount">$${paidTax.toLocaleString('en-US', {minimumFractionDigits:2})}</div><div class="label">Tax Paid to Date</div></div>
+        <div class="tax-card"><div class="amount" style="color:${outstanding > 0 ? '#dc2626' : '#16a34a'};">$${outstanding.toLocaleString('en-US', {minimumFractionDigits:2})}</div><div class="label">Outstanding Tax</div></div>
+      `;
+    }
+
+    function populateClaim(data) {
+      // Claim form logic: show requirements based on reason
+      const reasonSelect = document.getElementById('claimReason');
+      const reqDiv = document.getElementById('claimRequirements');
+      const reqList = document.getElementById('reqList');
+
+      reasonSelect.addEventListener('change', function() {
+        const reason = this.value;
+        let requirements = [];
+        if (reason === 'Trustee Deceased') {
+          requirements = [
+            'Certified copy of Death Certificate',
+            'Last Will and Testament (if available)',
+            'Court order granting probate (if applicable)',
+            'Valid ID of claimant',
+            'Proof of relationship to the trustee',
+            'Completed claim form (provided)'
+          ];
+        } else if (reason === 'Trustee Mentally Incapacitated') {
+          requirements = [
+            'Medical certificate from a recognised institution',
+            'Court order appointing a guardian or administrator',
+            'Valid ID of claimant',
+            'Proof of relationship',
+            'Power of Attorney (if any)'
+          ];
+        } else if (reason === 'Trustee Severely Ill') {
+          requirements = [
+            'Medical report detailing the illness',
+            'Valid ID of claimant',
+            'Proof of relationship',
+            'Supporting affidavit'
+          ];
+        } else {
+          requirements = ['Please contact our office for further guidance.'];
+        }
+        if (reason !== '') {
+          reqDiv.classList.remove('hidden');
+          reqList.innerHTML = requirements.map(r => `<li><i class="fas fa-check-circle"></i> ${r}</li>`).join('');
+        } else {
+          reqDiv.classList.add('hidden');
+        }
+      });
+
+      document.getElementById('claimForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const relationship = document.getElementById('claimRelationship').value;
+        const reason = document.getElementById('claimReason').value;
+        const details = document.getElementById('claimDetails').value;
+        if (!relationship || !reason) {
+          alert('Please select both relationship and reason.');
+          return;
+        }
+        // In a real system, we'd save the claim to Firestore and send email.
+        // For demo, we'll show a success message.
+        alert('Your claim request has been submitted. You will be contacted within 48 hours with further instructions.');
+        this.reset();
+        reqDiv.classList.add('hidden');
+      });
+    }
+  </script>
+</body>
+</html>
